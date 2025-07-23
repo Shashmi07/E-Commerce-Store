@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checkout</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Checkout</h1>
+    <form id="checkoutForm">
+      <label for="name">Name</label>
+      <input type="text" id="name" required />
+
+      <label for="address">Address Line</label>
+      <input type="text" id="address" required />
+
+      <label for="city">City</label>
+      <input type="text" id="city" required />
+
+      <label for="postal">Postal Code</label>
+      <input type="text" id="postal" required />
+
+      <button type="submit">Place Order</button>
+    </form>
+    <p id="message"></p>
+  </div>
+
+  <script>
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const userId = localStorage.getItem("userId") || "guest"; // Replace with actual user ID logic
+    const API_URL = "http://localhost:5000/api/orders";
+
+    document.getElementById("checkoutForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (cart.length === 0) {
+        document.getElementById("message").textContent = "Cart is empty!";
+        return;
+      }
+
+      const totalAmount = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+      const address = {
+        line1: document.getElementById("address").value,
+        city: document.getElementById("city").value,
+        postalCode: document.getElementById("postal").value
+      };
+
+      const orderData = {
+        userId,
+        products: cart.map(item => ({
+          productId: item._id,
+          quantity: item.quantity
+        })),
+        totalAmount,
+        address
+      };
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderData)
+        });
+
+        if (res.ok) {
+          localStorage.removeItem("cart");
+          document.getElementById("message").textContent = "Order placed successfully!";
+          setTimeout(() => window.location.href = "success.html", 1500);
+        } else {
+          const error = await res.json();
+          document.getElementById("message").textContent = "Error: " + error.message;
+        }
+      } catch (err) {
+        document.getElementById("message").textContent = "Failed to place order.";
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>

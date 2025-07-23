@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Account | RedStore</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #ffd6d6, #ffe6e6);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .account-container {
+      background: #fff;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #ff3f34;
+      margin-bottom: 20px;
+    }
+
+    #userInfo p {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin-top: 25px;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    ul li a {
+      text-decoration: none;
+      background-color: #ff3f34;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
+    }
+
+    ul li a:hover {
+      background-color: #e73428;
+    }
+  </style>
+</head>
+<body>
+  <div class="account-container">
+    <h1>My Account</h1>
+    <div id="userInfo"></div>
+
+    <ul>
+      <li id="logoutLink"><a href="#">Logout</a></li>
+      <li><a href="index.html">Home</a></li>
+    </ul>
+  </div>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      document.getElementById("userInfo").innerHTML =
+        `<p>Username: ${user.username}</p><p>Email: ${user.email}</p>`;
+    }
+
+    document.getElementById("logoutLink").addEventListener("click", () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>
