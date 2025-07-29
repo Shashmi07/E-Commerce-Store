@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Products | RedStore</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      margin: 0;
+      background: #f9f9f9;
+      color: #333;
+    }
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #ff3f34;
+      padding: 10px 20px;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .navbar .logo img {
+      height: 40px;
+    }
+    .navbar nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+    }
+    .navbar nav ul li a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      transition: opacity 0.3s;
+    }
+    .navbar nav ul li a:hover {
+      opacity: 0.8;
+    }
+    #cart-container {
+      position: relative;
+      cursor: pointer;
+    }
+    #cart-icon {
+      width: 28px;
+      height: 28px;
+    }
+    #cart-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #fff;
+      color: #ff3f34;
+      border-radius: 50%;
+      padding: 2px 7px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 2px solid #ff3f34;
+      display: none;
+      user-select: none;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #ff3f34;
+      margin-bottom: 25px;
+      font-weight: 700;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+      gap: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 3px 8px rgb(0 0 0 / 0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 8px 15px rgb(0 0 0 / 0.15);
+    }
+    .card img {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+    }
+    .card-content {
+      padding: 15px 20px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card-content h2 {
+      font-size: 20px;
+      margin: 12px 0 8px 0;
+      color: #222;
+    }
+    .card-content p {
+      font-size: 18px;
+      font-weight: 600;
+      color: #ff3f34;
+      margin: 0 0 15px 0;
+    }
+    .btn {
+      background: #ff3f34;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-weight: 600;
+    }
+    .btn:hover {
+      background: #e73428;
+    }
+    @media(max-width: 600px) {
+      .grid {
+        grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+      }
+      .card img {
+        height: 150px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">
+      <a href="product.html">
+        <img src="images/logo.png" alt="RedStore Logo" />
+      </a>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="product.html">Product</a></li>
+        <li><a href="account.html">Account</a></li>
+        
+      </ul>
+    </nav>
+    <div id="cart-container" onclick="window.location.href='cart.html'">
+      <img src="images/cart.png" alt="Cart" id="cart-icon" />
+      <span id="cart-count">0</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Our Products</h1>
+    <div class="grid" id="productGrid"></div>
+  </main>
+
+  <script>
+    const backendBaseUrl = "http://localhost:5000";
+
+    const grid = document.getElementById('productGrid');
+    const cartCountBadge = document.getElementById('cart-count');
+
+    function getImagePath(image) {
+      if (!image) return 'images/default.png'; // fallback image if empty
+
+      if (image.startsWith('http')) return image;
+
+      if (image.startsWith('/uploads')) return backendBaseUrl + image;
+
+      // If image is just filename without path
+      return backendBaseUrl + '/uploads/' + image;
+    }
+
+    function renderProducts(products) {
+      grid.innerHTML = products.map(p => `
+        <div class="card">
+          <img src="${getImagePath(p.image)}" alt="${p.name}" 
+               style="cursor:pointer;" 
+               onclick="showDescription('${p._id}')" />
+          <div class="card-content">
+            <h2>${p.name}</h2>
+            <p>$${p.price.toFixed(2)}</p>
+          </div>
+          <button class="btn" onclick="addToCart('${p._id}', '${p.name}', ${p.price}, '${p.image}')">Add to Cart</button>
+        </div>
+      `).join('');
+    }
+
+    async function fetchProducts() {
+      try {
+        const res = await fetch(backendBaseUrl + "/api/products");
+        const data = await res.json();
+        renderProducts(data);
+      } catch (err) {
+        console.error("Error loading products:", err);
+      }
+    }
+
+    function addToCart(id, name, price, image) {
+      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const existing = cart.find(item => item._id === id);
+      if (existing) existing.qty++;
+      else cart.push({ _id: id, name, price, img: image, qty: 1 });
+      localStorage.setItem("cart", JSON.stringify(cart));
+      updateCartCount();
+      alert(`${name} added to cart!`);
+    }
+
+    function updateCartCount() {
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const count = cart.reduce((sum, item) => sum + item.qty, 0);
+      cartCountBadge.textContent = count;
+      cartCountBadge.style.display = count > 0 ? "inline" : "none";
+    }
+
+    function showDescription(id) {
+      window.location.href = `product-details.html?id=${id}`;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchProducts();
+      updateCartCount();
+    });
+  </script>
+</body>
+</html>

@@ -1,33 +1,23 @@
-// backend/routes/orders.js
-
 const express = require("express");
 const router = express.Router();
+const Order = require("../models/Order");
 
-// Dummy orders array (later connect to DB)
-const orders = [
-  {
-    id: 1,
-    userId: 101,
-    products: [
-      { productId: 1, quantity: 2 },
-      { productId: 2, quantity: 1 }
-    ],
-    total: 180,
-    status: "Processing"
+// POST /api/orders — place an order
+router.post("/", async (req, res) => {
+  try {
+    const { userId, items, total } = req.body;
+
+    if (!userId || !items || items.length === 0 || !total) {
+      return res.status(400).json({ msg: "Invalid order data" });
+    }
+
+    const newOrder = new Order({ user: userId, items, total });
+    await newOrder.save();
+    res.status(201).json({ msg: "Order placed successfully", order: newOrder });
+  } catch (err) {
+    console.error("❌ Error placing order:", err);
+    res.status(500).json({ msg: "Server error" });
   }
-];
-
-// GET /api/orders
-router.get("/", (req, res) => {
-  res.json(orders);
-});
-
-// POST /api/orders
-router.post("/", (req, res) => {
-  const newOrder = req.body;
-  newOrder.id = Date.now();
-  orders.push(newOrder);
-  res.status(201).json(newOrder);
 });
 
 module.exports = router;

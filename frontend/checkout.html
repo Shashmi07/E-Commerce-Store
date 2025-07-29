@@ -2,81 +2,93 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Checkout</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Checkout - RedStore</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 2rem auto; }
+    h1 { color: #ff3f34; }
+    .cart-item { display: flex; justify-content: space-between; margin-bottom: 10px; }
+    button { background-color: #ff3f34; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; }
+    button:hover { background-color: #e73428; }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Checkout</h1>
-    <form id="checkoutForm">
-      <label for="name">Name</label>
-      <input type="text" id="name" required />
 
-      <label for="address">Address Line</label>
-      <input type="text" id="address" required />
+  <h1>Checkout</h1>
 
-      <label for="city">City</label>
-      <input type="text" id="city" required />
+  <div id="cartItems"></div>
 
-      <label for="postal">Postal Code</label>
-      <input type="text" id="postal" required />
+  <p><strong>Total: $<span id="totalPrice">0</span></strong></p>
 
-      <button type="submit">Place Order</button>
-    </form>
-    <p id="message"></p>
-  </div>
+  <button id="placeOrderBtn">Place Order</button>
 
   <script>
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const userId = localStorage.getItem("userId") || "guest"; // Replace with actual user ID logic
-    const API_URL = "http://localhost:5000/api/orders";
+    // Simulate getting cart from localStorage (example format)
+    // Replace with your actual cart data structure
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-    document.getElementById("checkoutForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      alert('Please login to place an order');
+      window.location.href = 'login.html';
+    }
 
+    const cartItemsDiv = document.getElementById('cartItems');
+    const totalPriceSpan = document.getElementById('totalPrice');
+
+    let totalPrice = 0;
+
+    // Display cart items
+    if (cart.length === 0) {
+      cartItemsDiv.innerHTML = '<p>Your cart is empty.</p>';
+    } else {
+      cart.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'cart-item';
+        itemDiv.innerHTML = `
+          <span>${item.name} (x${item.quantity})</span>
+          <span>$${(item.price * item.quantity).toFixed(2)}</span>
+        `;
+        cartItemsDiv.appendChild(itemDiv);
+        totalPrice += item.price * item.quantity;
+      });
+      totalPriceSpan.textContent = totalPrice.toFixed(2);
+    }
+
+    // Place order button click
+    document.getElementById('placeOrderBtn').addEventListener('click', async () => {
       if (cart.length === 0) {
-        document.getElementById("message").textContent = "Cart is empty!";
+        alert('Your cart is empty!');
         return;
       }
 
-      const totalAmount = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-      const address = {
-        line1: document.getElementById("address").value,
-        city: document.getElementById("city").value,
-        postalCode: document.getElementById("postal").value
-      };
-
-      const orderData = {
-        userId,
-        products: cart.map(item => ({
-          productId: item._id,
-          quantity: item.quantity
-        })),
-        totalAmount,
-        address
-      };
+      const orderProducts = cart.map(item => ({
+        productId: item._id, // Assuming your product has _id
+        quantity: item.quantity,
+      }));
 
       try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(orderData)
+        const res = await fetch('http://localhost:5000/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user._id,  // User's ID from localStorage user data
+            products: orderProducts,
+          }),
         });
 
         if (res.ok) {
-          localStorage.removeItem("cart");
-          document.getElementById("message").textContent = "Order placed successfully!";
-          setTimeout(() => window.location.href = "success.html", 1500);
+          alert('Order placed successfully!');
+          localStorage.removeItem('cart'); // Clear cart
+          window.location.href = 'index.html'; // Redirect after order
         } else {
-          const error = await res.json();
-          document.getElementById("message").textContent = "Error: " + error.message;
+          const errorData = await res.json();
+          alert('Failed to place order: ' + (errorData.msg || 'Unknown error'));
         }
-      } catch (err) {
-        document.getElementById("message").textContent = "Failed to place order.";
-        console.error(err);
+      } catch (error) {
+        alert('Error placing order: ' + error.message);
       }
     });
   </script>
+
 </body>
 </html>

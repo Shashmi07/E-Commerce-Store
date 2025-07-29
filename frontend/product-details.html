@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Product Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    .product-container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    h2 {
+      margin: 10px 0 15px;
+      font-size: 28px;
+      color: #222;
+    }
+    .price {
+      color: #ff3f34;
+      font-size: 24px;
+      margin: 12px 0 20px;
+      font-weight: 700;
+    }
+    .desc {
+      margin: 15px 0 30px;
+      line-height: 1.6;
+      font-size: 16px;
+      color: #555;
+    }
+    .btn {
+      background-color: #ff3f34;
+      color: #fff;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 18px;
+      transition: background-color 0.3s ease;
+    }
+    .btn:hover {
+      background-color: #e73428;
+    }
+  </style>
+</head>
+<body>
+  <div class="product-container" id="productDetails">
+    <p>Loading product...</p>
+  </div>
+
+  <script>
+    async function loadProductDetails() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      const container = document.getElementById('productDetails');
+
+      if (!id) {
+        container.innerHTML = '<p>Product not found.</p>';
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:5000/api/products/${id}`);
+        if (!res.ok) throw new Error('Product not found');
+        const product = await res.json();
+
+        container.innerHTML = `
+          <h2>${product.name}</h2>
+          <p class="price">$${product.price.toFixed(2)}</p>
+          <p class="desc">${product.description}</p>
+          <button class="btn" onclick="addToCart('${product._id}', '${product.name}', ${product.price}, '')">Add to Cart</button>
+        `;
+      } catch (err) {
+        container.innerHTML = '<p>Error loading product.</p>';
+      }
+    }
+
+    function addToCart(id, name, price, image) {
+      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const existing = cart.find(item => item._id === id);
+      if (existing) existing.qty++;
+      else cart.push({ _id: id, name, price, img: image, qty: 1 });
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert(`${name} added to cart!`);
+    }
+
+    loadProductDetails();
+  </script>
+</body>
+</html>
