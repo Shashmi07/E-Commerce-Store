@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // Serve uploaded images and frontend static images
-app.use("/uploads", express.static(path.join(__dirname, "backend/uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 

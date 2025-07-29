@@ -41,7 +41,7 @@ router.get("/:id", async (req, res) => {
 router.post("/", upload.single("image"), async (req, res) => {
   try {
     const { name, price, description, inStock } = req.body;
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : "";
+    const imagePath = req.file.filename; // Get the uploaded file name
 
     const product = new Product({
       name,

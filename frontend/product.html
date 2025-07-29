@@ -96,8 +96,10 @@
     }
     .card img {
       width: 100%;
-      height: 400px;
+      height: 350px;
       object-fit: cover;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
     }
     .card-content {
       padding: 15px 20px;
@@ -121,8 +123,8 @@
       background: #ff3f34;
       color: white;
       border: none;
-      border-radius: 8px;
-      padding: 12px 15px;
+      border-radius:5px;
+      padding: 12px 12px;
       font-size: 16px;
       cursor: pointer;
       transition: background-color 0.3s;
@@ -153,6 +155,8 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="product.html">Product</a></li>
         <li><a href="account.html">Account</a></li>
+        <li><a href="cart.html">Cart</a></li>
+        
         
       </ul>
     </nav>
@@ -173,16 +177,16 @@
     const grid = document.getElementById('productGrid');
     const cartCountBadge = document.getElementById('cart-count');
 
-    function getImagePath(image) {
-      if (!image) return 'images/default.png'; // fallback image if empty
+  function getImagePath(image) {
+  if (!image) return 'images/default.png';
+  if (image.startsWith('http')) return image;
 
-      if (image.startsWith('http')) return image;
+  // ✅ Strip leading "/uploads/" if exists
+  const filenameOnly = image.replace(/^\/?uploads\//, "");
+  return backendBaseUrl + "/uploads/" + filenameOnly;
+}
 
-      if (image.startsWith('/uploads')) return backendBaseUrl + image;
 
-      // If image is just filename without path
-      return backendBaseUrl + '/uploads/' + image;
-    }
 
     function renderProducts(products) {
       grid.innerHTML = products.map(p => `
@@ -216,7 +220,7 @@
       else cart.push({ _id: id, name, price, img: image, qty: 1 });
       localStorage.setItem("cart", JSON.stringify(cart));
       updateCartCount();
-      alert(`${name} added to cart!`);
+      
     }
 
     function updateCartCount() {

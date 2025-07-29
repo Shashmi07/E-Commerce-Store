@@ -102,8 +102,8 @@
       if (res.ok) {
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("token", data.token);
-        alert("Login successful!");
-        window.location.href = "account.html";
+        
+        window.location.href = "cart.html";
       } else {
         alert(data.msg || "Login failed");
       }
