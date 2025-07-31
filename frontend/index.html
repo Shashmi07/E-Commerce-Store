@@ -27,6 +27,9 @@
                     <li class="account-link"><a href="account.html">Account</a></li>
                     
                     <li class="cart-link"><a href="cart.html">Cart</a></li>
+                    <li><a href="admin-login.html">Admin</a></li>
+                    <li id="admin-link" style="display: none;"><a href="admin-dashboard.html">Admin</a></li>
+
                    
 
                     
@@ -411,6 +414,11 @@
       // Hide login and register links
       document.querySelectorAll(".login-link, .register-link").forEach(el => el.style.display = "none");
     }
+
+  if (user && user.role === "admin") {
+    document.getElementById("admin-link").style.display = "inline";
+  }
+  
   </script>
 
     

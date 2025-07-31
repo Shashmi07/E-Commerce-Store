@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Login | RedStore</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .login-box {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      text-align: center;
+      color: #ff3f34;
+    }
+    input, button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin: 15px 0;
+      font-size: 16px;
+    }
+    button {
+      background: #ff3f34;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #e3342f;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>Admin Login</h2>
+    <form id="adminLoginForm">
+      <input type="text" id="adminUsername" placeholder="Username" required />
+      <input type="password" id="adminPassword" placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("adminLoginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById("adminUsername").value.trim();
+      const password = document.getElementById("adminPassword").value.trim();
+
+      // Static admin check
+      if (username === "admin" && password === "admin123") {
+        const adminUser = {
+          username: "admin",
+          email: "admin@redstore.com",
+          role: "admin"
+        };
+        localStorage.setItem("user", JSON.stringify(adminUser));
+        alert("Admin login successful!");
+        window.location.href = "admin-dashboard.html";
+      } else {
+        alert("Invalid admin credentials!");
+      }
+    });
+  </script>
+</body>
+</html>

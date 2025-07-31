@@ -276,14 +276,20 @@
       }
 
       const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+const products = cart.map((item) => ({
+    productId: item._id, // or item.id depending on how you store it
+    name: item.name,
+    quantity: item.qty,
+    price: item.price
+  }));
 
       fetch("http://localhost:5000/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: user._id,
-          items: cart,
-          total,
+          customerName: user.username, // or user.fullName
+          email: user.email,
+          cartItems: cart,
         }),
       })
       .then(res => res.json())
@@ -293,7 +299,8 @@
           localStorage.removeItem("cart");
           renderCart();
           updateCartCount();
-          window.location.href = "product.html";
+          // Redirect to order details page with order ID
+          window.location.href = `order-details.html?orderId=${data.order._id}`;
         } else {
           alert(data.msg || "Order failed");
         }

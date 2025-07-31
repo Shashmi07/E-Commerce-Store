@@ -6,12 +6,13 @@
   <style>
     * {
       box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: Arial, sans-serif;
     }
     body {
       margin: 0;
-      background: #f9f9f9;
-      color: #333;
+      background: #f4f4f4;
+      color: #222;
+      padding: 30px;
     }
     .navbar {
       display: flex;
@@ -82,9 +83,9 @@
       gap: 20px;
     }
     .card {
-      background: white;
+      background: #fff;
       border-radius: 12px;
-      box-shadow: 0 3px 8px rgb(0 0 0 / 0.1);
+      box-shadow: 0 0 5px #ccc;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -96,7 +97,7 @@
     }
     .card img {
       width: 100%;
-      height: 350px;
+      height: 250px;
       object-fit: cover;
       border-top-left-radius: 12px;
       border-top-right-radius: 12px;
@@ -133,12 +134,36 @@
     .btn:hover {
       background: #e73428;
     }
+    #toast {
+      position:fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #259f5e;
+      color: #fff;
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 700;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    #toast.show {
+      display: block;
+      opacity: 1;
+    }
     @media(max-width: 600px) {
+      .container {
+        padding: 0 8px;
+      }
       .grid {
-        grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+        grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
+        gap: 12px;
       }
       .card img {
-        height: 150px;
+        height: 120px;
       }
     }
   </style>
@@ -170,6 +195,7 @@
     <h1>Our Products</h1>
     <div class="grid" id="productGrid"></div>
   </main>
+  <div id="toast" style="display:none;">Added to cart!</div>
 
   <script>
     const backendBaseUrl = "http://localhost:5000";
@@ -198,7 +224,7 @@
             <h2>${p.name}</h2>
             <p>$${p.price.toFixed(2)}</p>
           </div>
-          <button class="btn" onclick="addToCart('${p._id}', '${p.name}', ${p.price}, '${p.image}')">Add to Cart</button>
+          <button class="btn" onclick="addToCart('${p._id}', '${p.name}', ${p.price}, '${p.image}', this)">Add to Cart</button>
         </div>
       `).join('');
     }
@@ -213,14 +239,22 @@
       }
     }
 
-    function addToCart(id, name, price, image) {
+    function addToCart(id, name, price, image, btn) {
       let cart = JSON.parse(localStorage.getItem("cart") || "[]");
       const existing = cart.find(item => item._id === id);
       if (existing) existing.qty++;
       else cart.push({ _id: id, name, price, img: image, qty: 1 });
       localStorage.setItem("cart", JSON.stringify(cart));
       updateCartCount();
-      
+
+      // Show "Added to cart!" message near button
+      const msgSpan = btn.nextElementSibling;
+      if (msgSpan) {
+        msgSpan.style.display = "inline";
+        setTimeout(() => {
+          msgSpan.style.display = "none";
+        }, 1200);
+      }
     }
 
     function updateCartCount() {
@@ -238,6 +272,27 @@
       fetchProducts();
       updateCartCount();
     });
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+        toast.style.display = "none";
+      }, 1500);
+      toast.style.display = "block";
+    }
+
+    function addToCart(id, name, price, image) {
+      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const existing = cart.find(item => item._id === id);
+      if (existing) existing.qty++;
+      else cart.push({ _id: id, name, price, img: image, qty: 1 });
+      localStorage.setItem("cart", JSON.stringify(cart));
+      updateCartCount();
+      showToast("Added to cart!");
+    }
   </script>
 </body>
 </html>
